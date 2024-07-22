@@ -16,15 +16,28 @@ bedrock = boto3.client(
 )
 
 def generate_question(sentence, metadata):
-    prompt = f"""You are an AI assistant tasked with generating a relevant question based on a given sentence. Use the provided metadata for context.
+    prompt = f"""You are an AI assistant tasked with generating a specific and accurate question 
+    based on a given answer. The provided sentence is the answer, and your task is to create a question
+    that would naturally lead to this answer. Use the provided metadata for context.
 
-Metadata:
+Given answer: "{sentence}"
+
+Metadata (for context):
 Type: {metadata['type']}
 Title: {metadata['title']}
 Headers: {', '.join(metadata['headers'])}
 
-Generate a question based on the following sentence:
-"{sentence}" """
+Guidelines:
+1. The question should be specific enough that the given sentence is the most appropriate answer.
+2. Use key information from the answer to formulate the question.
+3. Ensure the question cannot be answered by a simple yes or no.
+4. The question should be relevant to the context provided in the metadata.
+5. Avoid using the exact wording from the answer in the question.
+
+Generate a single, specific question for which the given sentence is the most appropriate answer. 
+Return only the question itself, without any additional text or explanation.
+Return only the question itself, without any introductory phrases or additional text.
+"""
 
     # Format the request payload using the model's native structure
     native_request = {
@@ -42,7 +55,7 @@ Generate a question based on the following sentence:
     request = json.dumps(native_request)
 
     response = bedrock.invoke_model(
-        modelId=os.getenv('BEDROCK_MODEL_ID', 'anthropic.claude-3-haiku-20240307-v1:0'),
+        modelId=os.getenv('BEDROCK_MODEL_ID'),
         body=request
     )
 
