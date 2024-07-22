@@ -16,18 +16,19 @@ mongo_uri = os.getenv('MONGODB_URI')
 client = MongoClient(mongo_uri)
 db = client.test
 
-def process_sentence(args):
-    sentence, metadata, doc_type, doc_title = args
-    question = generate_question(sentence, metadata)
+def process_sentences(args):
+    sentences, metadata, doc_type, doc_title = args
+    interactions = []
+    for sentence in sentences:
+        question = generate_question(sentence, metadata)
+        interactions.append({"role": "user", "content": question})
+        interactions.append({"role": "assistant", "content": sentence})
+    
     json_line = {
         "system": f"You are talking to Jim Chen about {doc_type}, titled '{doc_title}'.",
-        "messages": [
-            {"role": "user", "content": question},
-            {"role": "assistant", "content": sentence}
-        ]
+        "messages": interactions
     }
-    print(f"Q: {question}")
-    print(f"A: {sentence}")
+    print(f"Generated {len(interactions)//2} interactions for '{doc_title}'")
     print("---")
     return json.dumps(json_line)
 
@@ -52,15 +53,18 @@ for document in documents:
 
     print(f"Generating training data for document: {doc_title}")
 
-    # Prepare arguments for parallel processing
-    args_list = [(sentence, metadata, doc_type, doc_title) for sentence in doc_body]
+    # Group sentences into chunks of up to 5
+    sentence_chunks = [doc_body[i:i+5] for i in range(0, len(doc_body), 5)]
 
-    # Process sentences in parallel
+    # Prepare arguments for parallel processing
+    args_list = [(chunk, metadata, doc_type, doc_title) for chunk in sentence_chunks]
+
+    # Process sentence chunks in parallel
     with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
-        results = list(executor.map(process_sentence, args_list))
+        results = list(executor.map(process_sentences, args_list))
 
     # Write results to file
-    with open('../../data/train/training_data.jsonl', 'a') as f:
+    with open('../../data/multi_conversation_training_data.jsonl', 'a') as f:
         for result in results:
             f.write(result + '\n')
 
