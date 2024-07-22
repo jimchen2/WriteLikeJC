@@ -1,13 +1,7 @@
-import os
-from dotenv import load_dotenv
-from pymongo import MongoClient
 import re
 import nltk
 nltk.download('punkt', quiet=True)
 from nltk.tokenize import sent_tokenize
-
-# Load environment variables
-load_dotenv()
 
 def remove_code_blocks(text):
     text = re.sub(r'```[\s\S]*?```', '', text)
@@ -27,8 +21,6 @@ def remove_bullet_lists(text):
             non_bullet_lines.append(line)
     return '\n'.join(non_bullet_lines)
 
-
-
 def remove_tables(text):
     lines = text.split('\n')
     non_table_lines = []
@@ -44,7 +36,6 @@ def remove_tables(text):
             in_table = False
         non_table_lines.append(line)
     return '\n'.join(non_table_lines)
-
 
 def remove_special_characters(text):
     return re.sub(r'[^a-zA-Z0-9\s.!?,]', '', text)
@@ -104,34 +95,3 @@ def get_sentences(text):
     clean = clean_text(text)
     sentences = split_into_sentences(clean)
     return merge_sentences(sentences)
-
-# Use the MongoDB URI from .env
-mongo_uri = os.getenv('MONGODB_URI')
-
-# Connect to MongoDB
-client = MongoClient(mongo_uri)
-db = client.test
-
-# Find a random document
-random_document = list(db.documents.aggregate([{ '$sample': { 'size': 1 } }]))[0]
-
-# Extract and clean content
-doc_type = random_document.get('type', 'No type specified')
-doc_title = clean_text(random_document.get('title', 'No title specified'))
-body_content = remove_code_blocks(random_document.get('body', ''))
-headers, body_content = extract_headers_and_content(body_content)
-doc_body = get_sentences(body_content)
-
-client.close()
-
-# Print the cleaned up information
-print("Metadata:")
-print(f"Type: {doc_type}")
-print(f"Title: {doc_title}")
-print("Headers:")
-for header in headers:
-    print(f"- {header}")
-
-print("\nDocument sentences:")
-for i, sentence in enumerate(doc_body, 1):
-    print(f"{i}. {sentence}")

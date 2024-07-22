@@ -1,0 +1,36 @@
+Metadata:
+Type: linux
+Title: Configuring Terminal Emulator
+Headers:
+- Terminal Emulator
+- Vim as a Savior?
+- Addressing Terminal Navigation
+- Keybinding Configuration
+- Modifying gnometerminal
+- Editing Within Neovims Terminal
+- Window Management and More
+- Leveraging Terminal Variables
+- Viewing History and Log Access historicalinsightsandlogaccess
+- References
+
+Document sentences:
+1. The default terminal emulator in GNOME, gnometerminal, leaves a lot to be desired when it comes to intuitive copypasting.
+2. The necessity of using the mouse to select text, followed by ctrlshiftc to copy, feels cumbersome. Moreover, navigating through it isnt as smooth as one would hope.
+3. My journey took me through various terminals byobu, xterm, and kitty, each having their unique perks but none fitting the bill perfectly.
+4. I delved into Vim about a year ago but found myself gravitating back to gedit for most tasks, perhaps not having tapped into Vims true potential back then.
+5. However, Ive since recognized the unparalleled efficiency of Vim, especially for editing extensive text files in the terminal.
+6. Its vast array of shortcuts and keyboard bindings facilitates an almost mousefree experience.
+7. Initially, I tried set o vi in the gnome terminal to impart vi behavior, but it wasnt seamless.
+8. The classic jk commands, which would typically navigate lines in Vim, fetched previous commands instead. Plus, unrestricted navigation through past commands was a challenge, and visual mode was lackluster.
+9. This led me to explore the terminal mode in Vim, which I found a bit cluttered. In contrast, the terminal mode in Neovim stood out, boasting a seamless experience.
+10. It defaults to normal mode, allowing easy toggling between insert and visual modes, enhancing terminal navigation considerably.
+11. A noteworthy tweak was adjusting the keybinding to switch to normal mode in the terminal. The ubiquitous esc key, though tempting, can conflict with other terminal processes.
+12. I remapped the caps key systemwide to f13 using xmodmap .Xmodmap in the bashrc.
+13. In my Neovim configuration .confignviminit.vim, I added This setup achieves two primary goals linking yanking and pasting in Neovim directly to the clipboard and utilizing the caps key as a trigger for normal mode, making the workflow more fluid.
+14. Optimizing the gnometerminal to launch with Neovims terminal mode by default was another enhancement.
+15. Achieved with After ensuring smooth navigation in the terminal, my next focus was on file editors within Neovims terminal.
+16. I noticed Vim had bugs when used inside the terminal, seemingly due to conflicts with Neovim. However, Neovim itself was bugfree in this context.
+17. I could use the esc key to enter normal mode in the file editor, and the caps key for Neovims terminal mode.
+18. Neovims sp command comes in handy for window splits, complemented by the ctrlw w navigation shortcut. This feature is a boon for simultaneously handling multiple terminal sessions or files.
+19. Commands like !0 and !1 after python example.py retrieve python and example.py respectively, while ! ! fetches the entire previous command. Such conveniences bolster efficiency in the terminal.
+20. Easily redirecting terminal history with history Downloadshistory has been beneficial. Additionally, the alias added to bashrc, streamlines the process of viewing logs, making it a cinch.
