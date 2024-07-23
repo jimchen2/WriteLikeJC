@@ -16,16 +16,31 @@ mongo_uri = os.getenv('MONGODB_URI')
 client = MongoClient(mongo_uri)
 db = client.test
 
-def process_document(args):
-    sentences, metadata, doc_type, doc_title = args
+def process_document(document):
+    # Extract and clean content
+    doc_type = document.get('type', 'No type specified')
+    doc_title = clean_text(document.get('title', 'No title specified'))
+    headers, body_content = extract_headers_and_content(document.get('body', ''))
+    doc_body = get_sentences(body_content)
+
+    # Prepare metadata for question generation
+    metadata = {
+        'type': doc_type,
+        'title': doc_title,
+        'headers': headers
+    }
+    print(json.dumps(metadata, indent=2))
+
+    print(f"Generating training data for document: {doc_title}")
+
     interactions = []
-    for sentence in sentences:
+    for sentence in doc_body:
         question = generate_question(sentence, metadata)
         interactions.append({"role": "user", "content": question})
         interactions.append({"role": "assistant", "content": sentence})
     
     json_line = {
-        "system": f"You are talking to Jim Chen about {doc_type}, titled '{doc_title}'.",
+        "system": f"You are Jim Chen, discussing {doc_type}, titled '{doc_title}'.",
         "messages": interactions
     }
     print(f"Generated {len(interactions)//2} interactions for '{doc_title}'")
@@ -35,43 +50,14 @@ def process_document(args):
 # Query for documents with access field equal to 1
 documents = list(db.documents.find({'access': 1}))
 
-# Prepare training data for each document
-with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
-    future_to_doc = {}
-    for document in documents:
-        # Extract and clean content
-        doc_type = document.get('type', 'No type specified')
-        doc_title = clean_text(document.get('title', 'No title specified'))
-        headers, body_content = extract_headers_and_content(document.get('body', ''))
-        doc_body = get_sentences(body_content)
-
-        # Prepare metadata for question generation
-        metadata = {
-            'type': doc_type,
-            'title': doc_title,
-            'headers': headers
-        }
-        print(json.dumps(metadata, indent=2))
-
-        print(f"Generating training data for document: {doc_title}")
-
-        # Prepare arguments for processing
-        args = (doc_body, metadata, doc_type, doc_title)
-        
-        # Submit the document for processing
-        future = executor.submit(process_document, args)
-        future_to_doc[future] = doc_title
-
-    # Write results to file as they complete
-    with open('../../data/full_conversation_training_data.jsonl', 'a') as f:
+# Process documents concurrently
+with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+    future_to_doc = {executor.submit(process_document, doc): doc for doc in documents}
+    
+    with open('../../data/full_conversation.jsonl', 'w') as f:
         for future in concurrent.futures.as_completed(future_to_doc):
-            doc_title = future_to_doc[future]
-            try:
-                result = future.result()
-                f.write(result + '\n')
-                print(f"Completed processing for '{doc_title}'")
-            except Exception as exc:
-                print(f'{doc_title} generated an exception: {exc}')
+            result = future.result()
+            f.write(result + '\n')
 
 client.close()
-print("Training data generation complete. Data saved to 'training_data.jsonl'.")
+print("Training data generation complete. Data saved to 'single_conversation_training_data.jsonl'.")

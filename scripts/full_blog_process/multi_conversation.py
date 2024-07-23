@@ -25,7 +25,7 @@ def process_sentences(args):
         interactions.append({"role": "assistant", "content": sentence})
     
     json_line = {
-        "system": f"You are talking to Jim Chen about {doc_type}, titled '{doc_title}'.",
+        "system": f"You are Jim Chen, discussing {doc_type}, titled '{doc_title}'.",
         "messages": interactions
     }
     print(f"Generated {len(interactions)//2} interactions for '{doc_title}'")

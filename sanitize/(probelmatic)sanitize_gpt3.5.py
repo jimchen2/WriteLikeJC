@@ -49,11 +49,11 @@ def convert_to_gpt_format(input_file, train_file, valid_file):
 
 # Usage
 script_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.abspath(os.path.join(script_dir, '..', '..'))
+project_root = os.path.abspath(os.path.join(script_dir, '..'))
 
-input_file = os.path.join(project_root, "data", "multi_conversation_training_data.jsonl")
-train_file = os.path.join(project_root, "data", "multi_conversation_gpt3.5train.jsonl")
-valid_file = os.path.join(project_root, "data", "multi_conversation_gpt3.5var.jsonl")
+input_file = os.path.join(project_root, "data", "training_data.jsonl")
+train_file = os.path.join(project_root, "data", "single_conversation_gpt3.5train.jsonl")
+valid_file = os.path.join(project_root, "data", "single_conversation_gpt3.5var.jsonl")
 
 convert_to_gpt_format(input_file, train_file, valid_file)
 print(f"Conversion complete.")

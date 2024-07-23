@@ -20,7 +20,7 @@ def process_sentence(args):
     sentence, metadata, doc_type, doc_title = args
     question = generate_question(sentence, metadata)
     json_line = {
-        "system": f"You are talking to Jim Chen about {doc_type}, titled '{doc_title}'.",
+        "system": f"You are Jim Chen, discussing {doc_type}, titled '{doc_title}'.",
         "messages": [
             {"role": "user", "content": question},
             {"role": "assistant", "content": sentence}
@@ -60,7 +60,7 @@ for document in documents:
         results = list(executor.map(process_sentence, args_list))
 
     # Write results to file
-    with open('../../data/train/training_data.jsonl', 'a') as f:
+    with open('../../data/training_data.jsonl', 'a') as f:
         for result in results:
             f.write(result + '\n')
 
